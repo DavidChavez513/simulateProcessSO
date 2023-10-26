@@ -14,7 +14,7 @@ class PlanificadorProcesos:
   def calcular_quantum(self):
     # Calcula el quantum usando el tiempo de ejecución del primer proceso en la lista
     if self.procesos:
-      tiempoTotal = 0.0
+      tiempoTotal = 0
       canProcesos = 0
       for i in range(len(self.procesos)):
         tiempoTotal += self.procesos[i].tiempo_ejecucion
@@ -100,24 +100,33 @@ class PlanificadorProcesos:
 
   def prioridad(self, quantum):
     # Ordena los procesos por su prioridad (mayor a menor)
-    procesos_ordenados = sorted(self.procesos)
+    procesos_ordenados = sorted(self.procesos,
+                                key=lambda x: x.prioridad,
+                                reverse=True)
     tiempo_total = 0
     tiempo_respuesta = 0
     print("Tabla de procesos (Prioridad):")
     print(f"\n Quantum: {quantum}")
     print(
-        "Proceso | Tiempo de Ejecución | Tiempo de Comienzo | Tiempo de Finalización | Tiempo de Respuesta"
+        "Proceso | Tiempo de Ejecución | Tiempo de Comienzo | Tiempo de Finalización | Tiempo de Respuesta | Prioridad"
     )
 
-    tiempo_quantum = 0
-    
+    tiempo_ejecucion = 0
+    tiempoProceso = 0
     for proceso in procesos_ordenados:
       
-      if proceso.tiempo_ejecucion < quantum:
-        print(
-            f"{proceso.nombre:^7}|{proceso.tiempo_ejecucion:^20}|{tiempo_total:^18}|{tiempo_total + tiempo_quantum:^21}|{tiempo_respuesta:^19}"
-        )
+      print(
+          f"{proceso.nombre:^7} | {proceso.tiempo_ejecucion:^20} | {tiempo_total:^18} | {tiempo_finalizacion:^21} | {tiempo_respuesta:^19} | {proceso.prioridad:^9}"
+      )
 
+      if proceso.tiempo_ejecucion >= quantum:
+        tiempo_total += quantum
+        proceso.prioridad = proceso.prioridad - 1
+        proceso.tiempo_ejecucion = proceso.tiempo_ejecucion - quantum
+        procesos_ordenados = sorted(procesos_ordenados,
+                                key=lambda x: x.prioridad,
+                                reverse=True)
+      
       
       
       tiempo_respuesta /= len(self.procesos)
@@ -125,13 +134,23 @@ class PlanificadorProcesos:
 
 
 # Ejemplo de uso con los datos proporcionados
-procesos = [
-    Proceso("A", 7, 4),
-    Proceso("B", 6, 1),
-    Proceso("C", 6, 5),
-    Proceso("D", 9, 2),
-    Proceso("E", 10, 3)
-]
+procesos = []
+
+print("Ingrese la cantidad de procesos a simular: ")
+n = input()
+
+print("Ingresa los datos por separado de un enter:")
+for i in range(int(n)):
+  
+  print("Proceso: " + str(i+1))
+  
+  print("Nombre: ")
+  nombre = input()
+  print("Tiempo de ejecución: ")
+  tiempo_ejecucion = input()
+  print("Prioridad: ")
+  prioridad = input()
+  procesos.append(Proceso(nombre, int(tiempo_ejecucion), int(prioridad)))
 
 planificador = PlanificadorProcesos(procesos)
 quantum = planificador.calcular_quantum()
